@@ -1,0 +1,7 @@
+function [D_bound] = boundary_from_flags(D_idx,D_val,bound_idx)
+%BOUNDARY_FROM_FLAGS Summary of this function goes here
+%   Detailed explanation goes here
+outputArg1 = inputArg1;
+outputArg2 = inputArg2;
+end
+
