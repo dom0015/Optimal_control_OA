@@ -1,11 +1,11 @@
-%% Discretization size and broblem setting
+%% Discretization size and problem setting
 nx=100; % discretization size x axis
 ny=100; % y axis
 Lx=1;   % size of the domain x axis
 Ly=1;   % y axis
-smothing_boundary = false; % deform grid to be smoother around the boundary
+smoothing_boundary = false; % deforms grid to be smoother around the boundary
                           % this makes neumann boundary conditions much
-                          % precise
+                          % more precise
 
 % setting for the problem with solution: u(x,y)= x*x+y*y (dirichlet match
 % the solution), therefore for low beta it match with Prescribed DB
@@ -29,7 +29,7 @@ beta=1e-1;
 
 %% Assemble all matrices and vector of the problem
 [M_r,M_m,K,R_r,R_m,R_b,f_vec,g_vec,~,tri_grid] = assemblers.Assembly_all(nx,ny,Lx,Ly,...
-    f,Neumann_boundary,Dirichlet_boundary,sigma,b_Dir,b_Neu_known,b_Neu_unknown,smothing_boundary);
+    f,Neumann_boundary,Dirichlet_boundary,sigma,b_Dir,b_Neu_known,b_Neu_unknown,smoothing_boundary);
 
 
 %% add artificially computed u_d
