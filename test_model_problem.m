@@ -33,7 +33,7 @@ beta=1e-1;
 
 
 %% add artificially computed u_d
-u_d = compute_artificial_u_d (nx,ny,smothing_boundary);
+u_d = compute_artificial_u_d (nx,ny,smoothing_boundary);
 
 %% Assembling 3x3 block matrix
 n_u=length(tri_grid.node);
