@@ -3,7 +3,7 @@ nx=100; % discretization size x axis
 ny=100; % y axis
 Lx=1;   % size of the domain x axis
 Ly=1;   % y axis
-smothing_boundary = true; % deform grid to be smoother around the boundary
+smothing_boundary = false; % deform grid to be smoother around the boundary
                           % this makes neumann boundary conditions much
                           % precise
 

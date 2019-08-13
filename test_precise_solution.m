@@ -23,7 +23,7 @@ b_Neu_unknown={2,[0 1]};
 
 % other parameters
 sigma=0.5;
-beta=1e-4;
+beta=1e-9;
 
 %% Assemble all matrices and vector of the problem
 [M_r,M_m,K,R_r,R_m,R_b,f_vec,g_vec,u_d,tri_grid] = assemblers.Assembly_all(nx,ny,Lx,Ly,...
