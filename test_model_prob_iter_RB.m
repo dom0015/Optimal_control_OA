@@ -33,7 +33,7 @@ beta=1e-1;
 
 
 %% add artificially computed u_d
-u_d = compute_artificial_u_d (nx,ny,smothing_boundary);
+u_d = compute_artificial_u_d (nx,ny,smoothing_boundary);
 
 %% Assembling 3x3 block matrix
 n_u=length(tri_grid.node);
@@ -53,25 +53,44 @@ b_3x3=[R_r'*M_r*u_d
 res=A_3x3\b_3x3;
 
 % iterative
-M_m_diag_inv=diag(1./diag(M_m));
-M_m_pruh=N*M_m_diag_inv*N';
+%M_m_diag_inv=diag(1./diag(M_m));
+M_m_pruh=R_m'*M_m*R_m;
+
 A_2x2=[K         (-1/beta)*M_m_pruh
        M_r_pruh                  K];
 B_2x2=[K         (-1/beta)*M_m_pruh
-       M_r_pruh  K+M_r_pruh+(-1/beta)*M_m_pruh];
-b_2x2=[R_r'*M_r*u_d
-    f_vec+R_b'*g_vec];
+       M_r_pruh  K+M_r_pruh+(1/beta)*M_m_pruh];
+b_2x2=[f_vec+R_b'*g_vec
+    R_r'*M_r*u_d];
 ddim=size(b_2x2);
 
-% iterative solution
-restart_iter=100; tol = 1e-6;  maxit = 100; 
-%itersolvers.fgmres(fgmres(A_2x2,b_2x2,restart_iter,tol,maxit,B_2x2,sparse(ddim)))
-[x,flag,relres,iter,resvec]=gmres(A_2x2,b_2x2,restart_iter,tol,maxit,B_2x2);
-iter
-resvec
+% iterative solution fgmres/gmres)
+restart_iter=100; tol = 1e-9;  maxit = 100; 
+[x,iter,resvec]=itersolvers.fgmres(A_2x2,b_2x2,restart_iter,tol,maxit,B_2x2);
+% [x,flag,relres,iter,resvec]=gmres(A_2x2,b_2x2,restart_iter,tol,maxit,B_2x2);
+% iter
+% resvec
 
-PA=inv(B_2x2)*A_2x2;
-EI=eigs(PA, 20)
+% spectrum estimation for discretization less than 20 it makes full
+% eigenvalue decomp. for greater, it computes smallest 20 eigenvalues
+
+if nx<=20
+    PA=B_2x2\A_2x2;
+    [U,D]=eig(full(PA));
+    EI=diag(D);
+else
+    EI=eigs(A_2x2,B_2x2,20,'smallestabs');
+end
+
+% plotting eigenvalues/lowest 20
+figure
+[tmp,idx]=sort(real(EI));
+hold on
+plot(imag(EI(idx)),'r.','MarkerSize',15)
+plot(tmp,'k.-','MarkerSize',10)
+grid on
+set(gca,'xScale','log')
+legend({'Imaginary part of Eig(PA)','Real part of Eig(PA)'})
 
 
 %%  extracting variables
@@ -80,6 +99,6 @@ w=res((n_u+1):2*n_u);
 v=res((2*n_u+1):end);
 
 %% plotting results
-plotting.plot_res(u,tri_grid); % values of u
-plotting.plot_res_grad(u,tri_grid); % gradient of u
-plotting.plot_Dir_bound(tri_grid,u,u_d,R_r); % difference on Dir. Boundary
+%plotting.plot_res(u,tri_grid); % values of u
+%plotting.plot_res_grad(u,tri_grid); % gradient of u
+%plotting.plot_Dir_bound(tri_grid,u,u_d,R_r); % difference on Dir. Boundary

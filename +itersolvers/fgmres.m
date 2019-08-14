@@ -1,4 +1,4 @@
-function [x,X] = fgmres(A,b,m,tol,maxit,P,x0)
+function [x,nit,resvec] = fgmres(A,b,m,tol,maxit,P,x0)
 %Flexible GMRES (FGMRES) with restart length m.
 %Solves Ax = b to tolerance tol using preconditioner P and initial guess x0
 %If P is a function handle, P(A) =approx= I.
@@ -56,6 +56,7 @@ end
 
 %Run FGMRES
 nprecb=norm(Pfct(b));
+resvec=[];
 X = [];
 nit = 1;
 while (nit <= maxit)
@@ -79,12 +80,13 @@ while (nit <= maxit)
         e1 = zeros(i+1,1); e1(1) = 1;
         y = H(1 : i+1, 1:i)\(beta*e1);
         x = x0 + Z(:, 1:i)*y;
-        if (nargout > 1)
-            X = [X,x];
-        end
+%         if (nargout > 1)
+%             X = [X,x];
+%         end
         resnorm = norm(Pfct(b-Afct(x)));
         disp(['k=', num2str(nit),  ...
             ', relative residual= ', num2str(resnorm/nprecb)])
+        resvec=[resvec;resnorm/nprecb];
         if (resnorm < tol*nprecb)
             disp(['FGMRES converged to relative tolerance ', ...
                 num2str(resnorm/nprecb), ...
