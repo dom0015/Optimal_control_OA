@@ -3,27 +3,27 @@ nx=60; % discretization size x axis
 ny=60; % y axis
 Lx=1;   % size of the domain x axis
 Ly=1;   % y axis
-smoothing_boundary = false; % deforms grid to be smoother around the boundary
-% this makes neumann boundary conditions much
-% more precise
+smoothing_boundary = true; % deforms grid to be smoother around the boundary
+                          % this makes neumann boundary conditions much
+                          % more precise
 
 % setting for the problem with solution: u(x,y)= x*x+y*y (dirichlet match
 % the solution), therefore for low beta it match with Prescribed DB
 
 f=@(x)x(:,1)*0+1;            % rhs of PDE
-Neumann_boundary=@(x)0*x(:,1);       % neuman boundary conditions (g(x))
-Dirichlet_boundary={@(x)x(:,1)*0, @(x)x(:,1)*0, @(x)x(:,1)*0}; % Dirichlet boundary to match
+Neumann_boundary=@(x)neumann_artificial_new(x);       % neuman boundary conditions (g(x))
+Dirichlet_boundary=@(x)1-(x(:,2)-0.5).^2; % Dirichlet boundary to match
 % Given neumann is on top,left and bottom side
 % Given Dirichlet to optimize is on the left side (0.2,0.8) part of side
 b_Dir={4,[0 1]};
-b_Neu_known={4,[0 1]};
-b_Neu_unknown={3,[0 1]
-    1,[0 1]
-    2,[0 1]};
+b_Neu_known={3,[0 1]
+    4,[0 1]
+    1,[0 1]};
+b_Neu_unknown={2,[0 1]};
 
 % other parameters
 sigma=1;
-
+%beta=1e-8;
 
 %% Assemble all matrices and vector of the problem
 [M_r,M_m,K,R_r,R_m,R_b,f_vec,g_vec,u_d,tri_grid] = assemblers.Assembly_all(nx,ny,Lx,Ly,...
@@ -31,7 +31,10 @@ sigma=1;
 
 
 %% add artificially computed u_d
-u_d = compute_artificial_u_d_2(nx,ny,smoothing_boundary);
+[u_reference,u_d] = artificial_u (nx,ny,Lx,Ly,smoothing_boundary,Neumann_boundary,f,sigma);
+[~,diff_x,~]=plotting.plot_res_grad(u_reference,tri_grid); % gradient of u
+[res_orig]=get_neumann_triangles(tri_grid,R_m,diff_x);
+
 
 %% Assembling 3x3 block matrix
 n_u=length(tri_grid.node);
@@ -78,7 +81,7 @@ for beta=10.^(-(1:9))
     ddim=size(b_2x2);
     
     % iterative solution fgmres/gmres)
-    restart_iter=100; tol = 1e-6;  maxit = 100;
+    restart_iter=100; tol = 1e-9;  maxit = 100;
     [x,iter,resvec]=itersolvers.fgmres(A_2x2,b_2x2,restart_iter,tol,maxit,B_2x2);
     % [x,flag,relres,iter,resvec]=gmres(A_2x2,b_2x2,restart_iter,tol,maxit,B_2x2);
     % iter
@@ -117,7 +120,7 @@ for beta=10.^(-(1:9))
     plotting.plot_Dir_bound(tri_grid,u,u_d,R_r); % difference on Dir. Boundary
     [res]=get_neumann_triangles(tri_grid,R_m,diff_x);
     figure(1113);hold on; plot(res)
-    neuman_norm(kkk)=norm(res-1);
+    neuman_norm(kkk)=norm(res-res_orig);
     dirichlet_norm(kkk)=norm(R_r*u-u_d);
     min_eig(kkk)=tmp(1);
     [~,idx]=max(imag(EI));

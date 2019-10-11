@@ -1,7 +1,7 @@
 %% Discretization size and problem setting
 nx=60; % discretization size x axis
 ny=60; % y axis
-Lx=1;   % size of the domain x axis
+Lx=0.1;   % size of the domain x axis
 Ly=1;   % y axis
 smoothing_boundary = true; % deforms grid to be smoother around the boundary
                           % this makes neumann boundary conditions much
@@ -23,7 +23,7 @@ b_Neu_unknown={2,[0 1]};
 
 % other parameters
 sigma=1;
-beta=1e-8;
+beta=1e-6;
 
 %% Assemble all matrices and vector of the problem
 [M_r,M_m,K,R_r,R_m,R_b,f_vec,g_vec,u_d,tri_grid] = assemblers.Assembly_all(nx,ny,Lx,Ly,...

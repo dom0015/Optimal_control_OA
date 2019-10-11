@@ -10,14 +10,14 @@
 % res_res=[];
 
 
-figure; plot(10.^(-(1:9)),dirichlet_norm,'-*','LineWidth',3)
+figure; plot(10.^(-(1:9)),neuman_norm,'-*','LineWidth',3)
 grid on
 box on
 set(gca,'yScale','log')
 set(gca,'xScale','log')
 
 
-title('dirichlet_norm')
+title('neuman_norm')
 xlabel('value of \beta')
-ylabel('dirichlet_norm')
+ylabel('neuman_norm')
 
