@@ -1,4 +1,4 @@
-function [f] = plot_res_grad(u,tri_grid)
+function [f,diff_x,diff_y] = plot_res_grad(u,tri_grid)
 %PLOT_RES Summary of this function goes here
 %   Detailed explanation goes here
 u=full(u);

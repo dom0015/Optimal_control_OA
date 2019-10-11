@@ -1,6 +1,6 @@
 %% Discretization size and problem setting
-nx=100; % discretization size x axis
-ny=100; % y axis
+nx=60; % discretization size x axis
+ny=60; % y axis
 Lx=1;   % size of the domain x axis
 Ly=1;   % y axis
 smoothing_boundary = false; % deforms grid to be smoother around the boundary
@@ -12,28 +12,26 @@ smoothing_boundary = false; % deforms grid to be smoother around the boundary
 
 f=@(x)x(:,1)*0+1;            % rhs of PDE
 Neumann_boundary=@(x)x(:,1)*0;       % neuman boundary conditions (g(x))
-Dirichlet_boundary=@(x)x(:,1)*0; % Dirichlet boundary to match
+Dirichlet_boundary=@(x)1-(x(:,2)-0.5).^2; % Dirichlet boundary to match
 % Given neumann is on top,left and bottom side
 % Given Dirichlet to optimize is on the left side (0.2,0.8) part of side
 b_Dir={4,[0 1]};
 b_Neu_known={3,[0 1]
     4,[0 1]
-    1,[0 1]
-    2,[0 0.15]
-    2,[0.85 1]};
-b_Neu_unknown={2,[0.15 0.85]};
+    1,[0 1]};
+b_Neu_unknown={2,[0 1]};
 
 % other parameters
 sigma=1;
-beta=1e-1;
+beta=1e-10;
 
 %% Assemble all matrices and vector of the problem
-[M_r,M_m,K,R_r,R_m,R_b,f_vec,g_vec,~,tri_grid] = assemblers.Assembly_all(nx,ny,Lx,Ly,...
+[M_r,M_m,K,R_r,R_m,R_b,f_vec,g_vec,u_d,tri_grid] = assemblers.Assembly_all(nx,ny,Lx,Ly,...
     f,Neumann_boundary,Dirichlet_boundary,sigma,b_Dir,b_Neu_known,b_Neu_unknown,smoothing_boundary);
 
 
 %% add artificially computed u_d
-u_d = compute_artificial_u_d (nx,ny,smoothing_boundary);
+%u_d = compute_artificial_u_d (nx,ny,smoothing_boundary);
 
 %% Assembling 3x3 block matrix
 n_u=length(tri_grid.node);

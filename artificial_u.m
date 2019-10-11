@@ -1,29 +1,22 @@
-function u_d = compute_artificial_u_d (nx,ny,smothing_boundary,sigma)
+function [u,u_d] = artificial_u (nx,ny,Lx,Ly,smothing_boundary,Neumann_boundary,f,sigma)
 
 %% Discretization size and broblem setting
-Lx=1;   % size of the domain x axis
-Ly=1;   % y axis
 
-% setting for the problem with solution: u(x,y)= x*x+y*y (dirichlet match
-% the solution), therefore for low beta it match with Prescribed DB
-
-f=@(x)x(:,1)*0+1;            % rhs of PDE
-Neumann_boundary=@(x)neumann_artificial(x);       % neuman boundary conditions (g(x))
 Dirichlet_boundary=@(x)x(:,1)*0; % Dirichlet boundary to match
 % Given neumann is on top,left and bottom side
 % Given Dirichlet to optimize is on the left side (0.2,0.8) part of side
 b_Dir={4,[0 1]};
-b_Neu_known={3,[0 1]
-    4,[0 1]
-    1,[0 1]
-    2,[0 1]};
-b_Neu_unknown={2,[0.15 0.85]};
+b_Neu_known={1,[0 1]
+    2,[0 1]
+    3,[0 1]
+    4,[0 1]};
+b_Neu_unknown={1,[0 1]};
 
 % other parameters
 
 
 %% Assemble all matrices and vector of the problem
-[~,~,K,R_r,~,R_b,f_vec,g_vec,~,tri_grid] = assemblers.Assembly_all(nx,ny,Lx,Ly,...
+[~,~,K,R_r,~,R_b,f_vec,g_vec,~,~] = assemblers.Assembly_all(nx,ny,Lx,Ly,...
     f,Neumann_boundary,Dirichlet_boundary,sigma,b_Dir,b_Neu_known,b_Neu_unknown,smothing_boundary);
 
 u=K\(f_vec+R_b'*g_vec);

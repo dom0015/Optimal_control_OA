@@ -11,21 +11,19 @@ smoothing_boundary = true; % deforms grid to be smoother around the boundary
 % the solution), therefore for low beta it match with Prescribed DB
 
 f=@(x)x(:,1)*0+1;            % rhs of PDE
-Neumann_boundary=@(x)x(:,1)*0;       % neuman boundary conditions (g(x))
+Neumann_boundary=@(x)neumann_artificial_new(x);       % neuman boundary conditions (g(x))
 Dirichlet_boundary=@(x)1-(x(:,2)-0.5).^2; % Dirichlet boundary to match
 % Given neumann is on top,left and bottom side
 % Given Dirichlet to optimize is on the left side (0.2,0.8) part of side
 b_Dir={4,[0 1]};
 b_Neu_known={3,[0 1]
     4,[0 1]
-    1,[0 1]
-    2,[0 0.15]
-    2,[0.85 1]};
-b_Neu_unknown={2,[0.15 0.85]};
+    1,[0 1]};
+b_Neu_unknown={2,[0 1]};
 
 % other parameters
 sigma=1;
-beta=1e-6;
+beta=1e-8;
 
 %% Assemble all matrices and vector of the problem
 [M_r,M_m,K,R_r,R_m,R_b,f_vec,g_vec,u_d,tri_grid] = assemblers.Assembly_all(nx,ny,Lx,Ly,...
@@ -33,7 +31,10 @@ beta=1e-6;
 
 
 %% add artificially computed u_d
-u_d = compute_artificial_u_d (nx,ny,smoothing_boundary,sigma);
+[u_reference,u_d] = artificial_u (nx,ny,Lx,Ly,smoothing_boundary,Neumann_boundary,f,sigma);
+[~,diff_x,~]=plotting.plot_res_grad(u_reference,tri_grid); % gradient of u
+[res]=get_neumann_triangles(tri_grid,R_m,diff_x);
+figure(1113);hold on; plot(res)
 
 %% Assembling 3x3 block matrix
 n_u=length(tri_grid.node);
@@ -65,7 +66,7 @@ b_2x2=[f_vec+R_b'*g_vec
 ddim=size(b_2x2);
 
 % iterative solution fgmres/gmres)
-restart_iter=100; tol = 1e-6;  maxit = 100; 
+restart_iter=100; tol = 1e-10;  maxit = 100; 
 [x,iter,resvec]=itersolvers.fgmres(A_2x2,b_2x2,restart_iter,tol,maxit,B_2x2);
 % [x,flag,relres,iter,resvec]=gmres(A_2x2,b_2x2,restart_iter,tol,maxit,B_2x2);
 % iter
